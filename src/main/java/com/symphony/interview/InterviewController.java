@@ -14,9 +14,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.LinkedList;
-import java.util.List;
-
 @RestController
 @Scope("singleton")
 @RequestMapping(path = "/interview", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
@@ -25,22 +22,22 @@ public class InterviewController {
   private Logger logger = LoggerFactory.getLogger("logger");
 
   @Autowired
-  private RemoteQuestionProvider remoteQuestionProvider;
+  private QuestionProviderService questionProviderService;
 
-  private List<RemoteQuestionProvider.Question> questions;
+  private QuestionProviderService.Question[] questions;
   private int selectedQuestionId = -1;
 
   @GetMapping("/{count}")
-  public String getQuestions(@PathVariable int count, @RequestParam(defaultValue = "easy", required = false) RemoteQuestionProvider.Difficulty difficulty) {
-    questions = new LinkedList<>();
+  public String getQuestions(@PathVariable int count, @RequestParam(defaultValue = "easy", required = false) QuestionProviderService.Difficulty difficulty) {
+    questions = new QuestionProviderService.Question[count];
     for (int i = 0; i < count; i++) {
-      questions.add(this.remoteQuestionProvider.getRandomQuestion(difficulty));
+      questions[i] = this.questionProviderService.getRandomQuestion(difficulty);
     }
 
     StringBuilder response = new StringBuilder();
 
-    for (int i = 0; i < questions.size(); i++) {
-      response.append(String.format("%02d", i+1) + "   " + questions.get(i).getQuestion()).append("\n");
+    for (int i = 0; i < questions.length; i++) {
+      response.append(String.format("%02d", i+1) + "   " + questions[i].getQuestion()).append("\n");
     }
 
     return response.toString();
@@ -50,7 +47,7 @@ public class InterviewController {
   public String selectQuestion(@PathVariable String id) {
     selectedQuestionId = Integer.parseInt(id);
     logger.debug(String.format("the candidate selected question with id %s", id));
-    return "Question to answer: " + questions.get(selectedQuestionId - 1).getQuestion();
+    return "Question to answer: " + questions[selectedQuestionId - 1].getQuestion();
   }
 
   @PutMapping(consumes = MediaType.TEXT_PLAIN_VALUE)
@@ -60,7 +57,7 @@ public class InterviewController {
       throw new IllegalStateException("You must select a question before.");
     }
 
-    final RemoteQuestionProvider.Question question = questions.get(selectedQuestionId - 1);
+    final QuestionProviderService.Question question = questions[selectedQuestionId - 1];
 
     if(Boolean.parseBoolean(question.getCorrectAnswer().toLowerCase()) == Boolean.parseBoolean(response)) {
       return "Correct answer =)";

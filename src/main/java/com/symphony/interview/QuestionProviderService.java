@@ -13,7 +13,7 @@ import java.util.List;
  * Issued from : https://opentdb.com/api_config.php
  */
 @Service
-public class RemoteQuestionProvider {
+public class QuestionProviderService {
 
   private static final int DEFAULT_CATEGORY = 18; // computer
 
@@ -40,12 +40,11 @@ public class RemoteQuestionProvider {
   }
 
   public Question getRandomQuestion(Difficulty difficulty) {
-    final RemoteResponse response = new RestTemplate()
+    return new RestTemplate()
         .getForObject("https://opentdb.com/api.php?amount=1&category={category}&difficulty={difficult}&type=boolean",
             RemoteResponse.class,
             DEFAULT_CATEGORY,
             difficulty
-        );
-    return response.results.get(0);
+        ).getResults().stream().findFirst().get();
   }
 }
