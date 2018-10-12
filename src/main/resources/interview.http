@@ -1,0 +1,26 @@
+#
+# Load questions set with amount
+# ? difficulty = {easy|medium\hard}
+#
+GET http://{{host}}/interview/10?difficulty=easy
+
+###
+
+#
+# Select the question to answer
+#
+
+DELETE http://{{host}}/interview/6
+
+###
+
+#
+# Answer to the selected question
+#
+
+PUT http://{{host}}/interview
+Content-Type: text/plain
+
+true
+
+###
